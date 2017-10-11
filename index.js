@@ -92,7 +92,11 @@ function session(options) {
   // get the session id generate function
   var generateId = opts.genid || generateSessionId
 
-  // get the session cookie name
+    /* Modified to get session id manually */
+    var getManualSessionId = options.sessionid || function(req) {};
+
+
+    // get the session cookie name
   var name = opts.name || opts.key || 'connect.sid'
 
   // get the session store
@@ -213,7 +217,7 @@ function session(options) {
     req.sessionStore = store;
 
     // get the session ID from the cookie
-    var cookieId = req.sessionID = getcookie(req, name, secrets);
+    var cookieId = req.sessionID = getManualSessionId(req) ? getManualSessionId(req) : getcookie(req, name, secrets);
 
     // set-cookie
     onHeaders(res, function(){
@@ -640,6 +644,8 @@ function setcookie(res, name, val, secret, options) {
   var prev = res.getHeader('set-cookie') || [];
   var header = Array.isArray(prev) ? prev.concat(data) : [prev, data];
 
+  /* Modified to set signed cookie in header */
+  res.setHeader('id_mercury', signed);
   res.setHeader('set-cookie', header)
 }
 
