@@ -93,7 +93,7 @@ function session(options) {
   var generateId = opts.genid || generateSessionId
 
     /* Modified to get session id manually */
-    var getManualSessionId = options.sessionid || function(req) {};
+  var getManualSessionId = options.sessionid || function(req) {};
 
 
     // get the session cookie name
@@ -216,8 +216,14 @@ function session(options) {
     // expose store
     req.sessionStore = store;
 
-    // get the session ID from the cookie
-    var cookieId = req.sessionID = getManualSessionId(req) ? getManualSessionId(req) : getcookie(req, name, secrets);
+    // get the session ID from the cookie or user defined function
+    var cookieId = getManualSessionId(req);
+    if (cookieId) {
+      cookieId = req.sessionID = getCookieFromUserDefinedMethod(cookieId, secrets);
+    }
+    else {
+      cookieId = req.sessionID = getcookie(req, name, secrets);
+    }
 
     // set-cookie
     onHeaders(res, function(){
@@ -504,6 +510,27 @@ function session(options) {
 
 function generateSessionId(sess) {
   return uid(24);
+}
+
+/* unsign the cookie when fetching from user defined method */
+function getCookieFromUserDefinedMethod(sessionId, secrets) {
+  var raw = sessionId;
+  var val = raw;
+
+  if (raw) {
+    if (raw.substr(0, 2) === 's:') {
+      val = unsigncookie(raw.slice(2), secrets);
+
+      if (val === false) {
+        debug('cookie signature invalid');
+        val = undefined;
+      }
+    } else {
+      debug('cookie unsigned')
+    }
+  }
+
+  return val;
 }
 
 /**
