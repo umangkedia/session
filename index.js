@@ -672,7 +672,7 @@ function setcookie(res, name, val, secret, options) {
   var header = Array.isArray(prev) ? prev.concat(data) : [prev, data];
 
   /* Modified to set signed cookie in header */
-  res.setHeader('id_mercury', signed);
+  res.setHeader('id-mercury', signed);
   res.setHeader('set-cookie', header)
 }
 
