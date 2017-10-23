@@ -116,6 +116,7 @@ function session(options) {
 
   // get the cookie signing secret
   var secret = opts.secret
+  var cookieHeader = opts.cookieHeader;
 
   if (typeof generateId !== 'function') {
     throw new TypeError('genid option must be a function');
@@ -249,7 +250,7 @@ function session(options) {
       }
 
       // set cookie
-      setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data);
+      setcookie(res, name, req.sessionID, secrets[0], req.session.cookie.data, cookieHeader);
     });
 
     // proxy end() to commit the session
@@ -662,7 +663,7 @@ function issecure(req, trustProxy) {
  * @private
  */
 
-function setcookie(res, name, val, secret, options) {
+function setcookie(res, name, val, secret, options, cookieHeader) {
   var signed = 's:' + signature.sign(val, secret);
   var data = cookie.serialize(name, signed, options);
 
@@ -672,7 +673,10 @@ function setcookie(res, name, val, secret, options) {
   var header = Array.isArray(prev) ? prev.concat(data) : [prev, data];
 
   /* Modified to set signed cookie in header */
-  res.setHeader('id-mercury', signed);
+  if(cookieHeader) {
+    res.setHeader('id-mercury', signed);
+  }
+
   res.setHeader('set-cookie', header)
 }
 
