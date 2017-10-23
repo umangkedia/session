@@ -674,7 +674,7 @@ function setcookie(res, name, val, secret, options, cookieHeader) {
 
   /* Modified to set signed cookie in header */
   if(cookieHeader) {
-    res.setHeader('id-mercury', signed);
+    res.setHeader(cookieHeader, signed);
   }
 
   res.setHeader('set-cookie', header)
